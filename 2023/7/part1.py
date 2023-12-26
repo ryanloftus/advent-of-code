@@ -6,27 +6,24 @@ def rank_hand(cards):
     pattern = []
     scards = sorted(cards) # duplicates will be adjacent
     prev = None
-    jokers = 0
     for i in range(len(scards)):
-        if scards[i] == "J":
-            jokers += 1
-        elif scards[i] == prev:
+        if scards[i] == prev:
             pattern[-1] += 1
         else:
             pattern.append(1)
         prev = scards[i]
     pattern.sort(reverse=True)
-    if jokers >= 4 or pattern[0] + jokers == 5:
+    if pattern[0] == 5:
         return 7
-    elif pattern[0] + jokers == 4:
+    elif pattern[0] == 4:
         return 6
-    elif pattern[0] + pattern[1] + jokers == 5:
+    elif pattern[0] == 3 and pattern[1] == 2:
         return 5
-    elif pattern[0] + jokers == 3:
+    elif pattern[0] == 3:
         return 4
-    elif pattern[0] == 2 and pattern[1] + jokers == 2:
+    elif pattern[0] == 2 and pattern[1] == 2:
         return 3
-    elif pattern[0] + jokers == 2:
+    elif pattern[0] == 2:
         return 2
     else:
         return 1
@@ -39,11 +36,11 @@ def get_card_num(card):
     elif card == "Q":
         return 10
     elif card == "J":
-        return 0
-    elif card == "T":
         return 9
+    elif card == "T":
+        return 8
     else:
-        return int(card) - 1
+        return int(card) - 2
 
 # treat hand as a base 13 number
 def get_tiebreaker(cards):
