@@ -28,23 +28,6 @@ def djikstra(track, si, sj):
             heappush(pq, (d+1, i, j+1))
     return dist
 
-def cheat_djikstra(track, si, sj):
-    dist = [[None] * len(row) for row in track]
-    pq = [(0, si, sj)]
-    while pq:
-        d, i, j = heappop(pq)
-        if i < 0 or i >= len(track) or j < 0 or j >= len(track[i]):
-            continue
-        if d > CHEAT_MAX_DURATION:
-            break
-        if dist[i][j] is None:
-            dist[i][j] = d
-            heappush(pq, (d+1, i-1, j))
-            heappush(pq, (d+1, i+1, j))
-            heappush(pq, (d+1, i, j-1))
-            heappush(pq, (d+1, i, j+1))
-    return dist
-
 def count_effective_cheats(track, min_saved_time):
     effective_cheats = set()
 
@@ -62,13 +45,11 @@ def count_effective_cheats(track, min_saved_time):
             if time_to_entry is None or time_to_entry + 2 > target_time:
                 continue
 
-            cheat_dists = cheat_djikstra(track, cheat_start_i, cheat_start_j)
-
             for cheat_end_i in range(len(track)):
                 for cheat_end_j in range(len(track[cheat_end_i])):
-                    cheat_time = cheat_dists[cheat_end_i][cheat_end_j]
+                    cheat_time = abs(cheat_start_i-cheat_end_i) + abs(cheat_start_j-cheat_end_j)
                     time_from_exit = dist_from_e[cheat_end_i][cheat_end_j]
-                    if cheat_time is None or time_from_exit is None:
+                    if cheat_time > CHEAT_MAX_DURATION or time_from_exit is None:
                         continue
 
                     time = time_to_entry + cheat_time + time_from_exit
