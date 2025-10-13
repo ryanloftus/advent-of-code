@@ -1,3 +1,4 @@
+from collections import defaultdict
 from heapq import *
 
 DIRS = [(-1, 0), (1, 0), (0, -1), (0, 1)]
@@ -14,14 +15,14 @@ def find_node(track, target):
                 return (i, j)
             
 def djikstra(track, si, sj):
-    dist = [[None] * len(row) for row in track]
+    dist = defaultdict(lambda: None)
     pq = [(0, si, sj)]
     while pq:
         d, i, j = heappop(pq)
         if i < 0 or i >= len(track) or j < 0 or j >= len(track[i]) or track[i][j] == "#":
             continue
-        if dist[i][j] is None:
-            dist[i][j] = d
+        if (i, j) not in dist:
+            dist[(i, j)] = d
             heappush(pq, (d+1, i-1, j))
             heappush(pq, (d+1, i+1, j))
             heappush(pq, (d+1, i, j-1))
@@ -29,34 +30,31 @@ def djikstra(track, si, sj):
     return dist
 
 def count_effective_cheats(track, min_saved_time):
-    effective_cheats = set()
+    effective_cheats = 0
 
     si, sj = find_node(track, "S")
     dist_from_s = djikstra(track, si, sj)
-
     ei, ej = find_node(track, "E")
     dist_from_e = djikstra(track, ei, ej)
 
-    target_time = dist_from_s[ei][ej] - min_saved_time
+    target_time = dist_from_s[(ei, ej)] - min_saved_time
 
-    for cheat_start_i in range(len(track)):
-        for cheat_start_j in range(len(track[cheat_start_i])):
-            time_to_entry = dist_from_s[cheat_start_i][cheat_start_j]
-            if time_to_entry is None or time_to_entry + 2 > target_time:
+    for cheat_start, time_to_entry in dist_from_s.items():
+        cheat_start_i, cheat_start_j = cheat_start
+        if time_to_entry + 2 > target_time:
+            continue
+
+        for cheat_end, time_from_exit in dist_from_e.items():
+            cheat_end_i, cheat_end_j = cheat_end
+            cheat_time = abs(cheat_start_i-cheat_end_i) + abs(cheat_start_j-cheat_end_j)
+            if cheat_time > CHEAT_MAX_DURATION or time_from_exit is None:
                 continue
 
-            for cheat_end_i in range(len(track)):
-                for cheat_end_j in range(len(track[cheat_end_i])):
-                    cheat_time = abs(cheat_start_i-cheat_end_i) + abs(cheat_start_j-cheat_end_j)
-                    time_from_exit = dist_from_e[cheat_end_i][cheat_end_j]
-                    if cheat_time > CHEAT_MAX_DURATION or time_from_exit is None:
-                        continue
-
-                    time = time_to_entry + cheat_time + time_from_exit
-                    if time <= target_time:
-                        effective_cheats.add((cheat_start_i, cheat_start_j, cheat_end_i, cheat_end_j))
+            time = time_to_entry + cheat_time + time_from_exit
+            if time <= target_time:
+                effective_cheats += 1
     
-    return len(effective_cheats)
+    return effective_cheats
 
 def solution():
     track = parse_input()
