@@ -15,6 +15,9 @@ def contains_only_red_and_green(t1, t2, red_tiles):
     the rectangle do not cross any lines that form the polygon
     defined by red_tiles.
     This is not actually true but close enough for the particular problem.
+    Specifically, a rectangle that lies entirely outside the polygon would be
+    valid, but because of the shape of this polygon, such a rectangle will not
+    be optimal anyway, so we can ignore this case.
     """
     minx = min(t1[0], t2[0])
     maxx = max(t1[0], t2[0])
