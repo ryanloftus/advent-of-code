@@ -9,20 +9,34 @@ def area(t1, t2):
     w = max(t1[1], t2[1]) - min(t1[1], t2[1]) + 1
     return l * w
 
+def point_is_in_rectangle(p, minx, maxx, miny, maxy):
+    return minx < p[0] and p[0] < maxx and miny < p[1] and p[1] < maxy
+
+def rectangle_contains_a_red_tile(minx, maxx, miny, maxy, red_tiles):
+    for i in range(len(red_tiles)):
+        if point_is_in_rectangle(red_tiles[i], minx, maxx, miny, maxy):
+            return True
+    return False
+
 def contains_only_red_and_green(t1, t2, red_tiles):
     """
-    The tile rectangle is valid iff the four lines that form
-    the rectangle do not cross any lines that form the polygon
-    defined by red_tiles.
+    The tile rectangle is valid iff the four lines that form the rectangle 
+    do not cross any lines that form the polygon defined by red_tiles
+    AND there are no red tiles contained within the rectangle.
+
     This is not actually true but close enough for the particular problem.
-    Specifically, a rectangle that lies entirely outside the polygon would be
-    valid, but because of the shape of this polygon, such a rectangle will not
+    Specifically, a rectangle that lies entirely outside the polygon would return
+    true here, but because of the shape of this polygon, such a rectangle will not
     be optimal anyway, so we can ignore this case.
     """
     minx = min(t1[0], t2[0])
     maxx = max(t1[0], t2[0])
     miny = min(t1[1], t2[1])
     maxy = max(t1[1], t2[1])
+
+    if rectangle_contains_a_red_tile(minx, maxx, miny, maxy, red_tiles):
+        return False
+
     for i in range(len(red_tiles)):
         dx = red_tiles[i][0] - red_tiles[i-1][0]
         if dx == 0:  # vertical line
